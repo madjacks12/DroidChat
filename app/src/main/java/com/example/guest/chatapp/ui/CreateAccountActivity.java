@@ -12,6 +12,7 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.guest.chatapp.Constants;
 import com.example.guest.chatapp.R;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
@@ -19,6 +20,8 @@ import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.UserProfileChangeRequest;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -28,6 +31,7 @@ public class CreateAccountActivity extends AppCompatActivity implements View.OnC
     private ProgressDialog mAuthProgressDialog;
     private String mName;
 
+    private DatabaseReference mUserReference;
     @BindView(R.id.createUserButton) Button mCreateUserButton;
     @BindView(R.id.nameEditText)
     EditText mNameEditText;
@@ -74,7 +78,7 @@ public class CreateAccountActivity extends AppCompatActivity implements View.OnC
     @Override
     public void onClick(View view) {
         if (view == mLoginTextView) {
-            Intent intent = new Intent(CreateAccountActivity.this, MainActivity.class);
+            Intent intent = new Intent(CreateAccountActivity.this, LoginActivity.class);
             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
             startActivity(intent);
             finish();
@@ -95,6 +99,12 @@ public class CreateAccountActivity extends AppCompatActivity implements View.OnC
         boolean validPassword = isValidPassword(password, confirmPassword);
         if (!validEmail || !validName || !validPassword) return;
         mAuthProgressDialog.show();
+
+        mUserReference = FirebaseDatabase
+        .getInstance()
+        .getReference()
+        .child(Constants.FIREBASE_CHILD_USERS);
+        saveNameToFirebase(name);
 
         mAuth.createUserWithEmailAndPassword(email, password).addOnCompleteListener(this, new OnCompleteListener<AuthResult>(){
 
@@ -121,7 +131,7 @@ public class CreateAccountActivity extends AppCompatActivity implements View.OnC
             public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
                 final FirebaseUser user = firebaseAuth.getCurrentUser();
                 if (user != null) {
-                    Intent intent = new Intent(CreateAccountActivity.this, MainActivity.class);
+                    Intent intent = new Intent(CreateAccountActivity.this, LoginActivity.class);
                     intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                     startActivity(intent);
                     finish();
@@ -172,5 +182,9 @@ public class CreateAccountActivity extends AppCompatActivity implements View.OnC
                     }
 
                 });
+    }
+
+    public void saveNameToFirebase(String name) {
+        mUserReference.setValue(name);
     }
 }
