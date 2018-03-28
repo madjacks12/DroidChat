@@ -9,18 +9,26 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 
+
 import com.example.guest.chatapp.Constants;
 import com.example.guest.chatapp.R;
 import com.example.guest.chatapp.adapters.UserListAdapter;
+import com.example.guest.chatapp.models.Users;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
+import java.util.ArrayList;
 
+import butterknife.BindView;
 
 
 public class UserListActivity extends AppCompatActivity {
     private DatabaseReference mUserReference;
+    private UserListAdapter mAdapter;
+    public ArrayList<Users>users;
+
+    @BindView(R.id.recyclerView) RecyclerView mRecyclerView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -32,7 +40,7 @@ public class UserListActivity extends AppCompatActivity {
                 .getReference()
                 .child(Constants.FIREBASE_CHILD_USERS);
 
-        mAdapter = new UserListAdapter(getApplicationContext(), restaurants);
+        mAdapter = new UserListAdapter;
         mRecyclerView.setAdapter(mAdapter);
         RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(RestaurantsListActivity.this);
         mRecyclerView.setLayoutManager(layoutManager);
