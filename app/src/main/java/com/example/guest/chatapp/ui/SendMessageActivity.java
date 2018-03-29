@@ -13,13 +13,18 @@ import android.widget.EditText;
 import android.widget.Toast;
 
 import com.example.guest.chatapp.R;
+import com.example.guest.chatapp.adapters.MessageListAdapter;
+import com.example.guest.chatapp.adapters.UserListAdapter;
 import com.example.guest.chatapp.models.Messages;
+import com.example.guest.chatapp.models.Users;
 import com.firebase.ui.database.FirebaseRecyclerAdapter;
 import com.firebase.ui.database.FirebaseRecyclerOptions;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
+
+import java.util.ArrayList;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -28,7 +33,9 @@ public class SendMessageActivity extends AppCompatActivity implements View.OnCli
 
     public static final String TAG = SendMessageActivity.class.getSimpleName();
     private Query query;
+    private MessageListAdapter mAdapter;
     private FirebaseRecyclerAdapter mFirebaseAdapter;
+    public ArrayList<Messages> messages = new ArrayList<>();
     private String chatId;
     @BindView(R.id.messageRecyclerView)
     RecyclerView mRecyclerView;
@@ -46,35 +53,19 @@ public class SendMessageActivity extends AppCompatActivity implements View.OnCli
         query = FirebaseDatabase.getInstance().getReference("chats").child(chatId).child("messages");
 
         mMessageSendButton.setOnClickListener(this);
-        setUpFirebaseAdapter();
+
 
     }
 
-    private void setUpFirebaseAdapter() {
-        FirebaseRecyclerOptions<Messages> options = new FirebaseRecyclerOptions.Builder<Messages>()
-                .setQuery(query, Messages.class)
-                .build();
-
-        mFirebaseAdapter = new FirebaseRecyclerAdapter<Messages, FirebaseMessageViewHolder>(options) {
-            @Override
-            protected void onBindViewHolder(FirebaseMessageViewHolder holder, int position, Messages message) {
-                holder.bindMessage(message);
-
-            }
-
-            @NonNull
-            @Override
-            public FirebaseMessageViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-                View view = LayoutInflater.from(parent.getContext())
-                        .inflate(R.layout.message_list_item, parent, false);
-
-                return new FirebaseMessageViewHolder(view);
-            }
-        };
+    public void setAdapter() {
+        mAdapter = new MessageListAdapter(getApplicationContext(), messages);
+        mRecyclerView.setAdapter(mAdapter);
+        RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(SendMessageActivity.this);
+        mRecyclerView.setLayoutManager(layoutManager);
         mRecyclerView.setHasFixedSize(true);
-        mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
-        mRecyclerView.setAdapter(mFirebaseAdapter);
+
     }
+
 
     @Override
     public void onClick(View view) {

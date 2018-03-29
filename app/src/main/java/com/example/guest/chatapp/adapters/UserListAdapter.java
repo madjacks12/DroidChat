@@ -75,7 +75,7 @@ public class UserListAdapter extends RecyclerView.Adapter<UserListAdapter.UserVi
             int itemPosition = getLayoutPosition();
             Intent intent = new Intent(mContext, SendMessageActivity.class);
             intent.putExtra("position", itemPosition + "");
-            intent.putExtra("restaurants", Parcels.wrap(mUsers));
+            intent.putExtra("messages", Parcels.wrap(mUsers));
             mContext.startActivity(intent);
         }
     }
