@@ -19,7 +19,8 @@
             </intent-filter>
         </activity>
         <activity android:name=".ui.CreateAccountActivity" />
-        <activity android:name=".ui.UserListActivity"></activity>
+        <activity android:name=".ui.UserListActivity" />
+        <activity android:name=".ui.SendMessageActivity"></activity>
     </application>
 
 </manifest>

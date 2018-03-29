@@ -14,6 +14,7 @@ import android.widget.Toast;
 
 import com.example.guest.chatapp.Constants;
 import com.example.guest.chatapp.R;
+import com.example.guest.chatapp.models.Users;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
@@ -22,6 +23,9 @@ import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.UserProfileChangeRequest;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+
+import java.util.HashMap;
+import java.util.Map;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -100,11 +104,13 @@ public class CreateAccountActivity extends AppCompatActivity implements View.OnC
         if (!validEmail || !validName || !validPassword) return;
         mAuthProgressDialog.show();
 
-        mUserReference = FirebaseDatabase
-        .getInstance()
-        .getReference()
-        .child(Constants.FIREBASE_CHILD_USERS);
-        saveNameToFirebase(name);
+//        mUserReference = FirebaseDatabase
+//        .getInstance()
+//        .getReference()
+//        .child(Constants.FIREBASE_CHILD_USERS);
+//        Map<String, Users> users = new HashMap<>();
+//        users.put(name, new Users(name, id));
+//        mUserReference.push().setValue(users);
 
         mAuth.createUserWithEmailAndPassword(email, password).addOnCompleteListener(this, new OnCompleteListener<AuthResult>(){
 
@@ -125,6 +131,35 @@ public class CreateAccountActivity extends AppCompatActivity implements View.OnC
 
         });
     }
+
+
+    private void createFirebaseUserProfile(final FirebaseUser user) {
+        UserProfileChangeRequest addProfileName = new UserProfileChangeRequest.Builder()
+                .setDisplayName(mName)
+                .build();
+
+        user.updateProfile(addProfileName)
+                .addOnCompleteListener(new OnCompleteListener<Void>() {
+                    @Override
+                    public void onComplete(@NonNull Task<Void> task) {
+                        if (task.isSuccessful()) {
+                            Log.d(TAG, "onComplete: " + user.getDisplayName());
+                            final String name = user.getDisplayName();
+                            final String id = user.getUid();
+                            Users newUser = new Users(name, id);
+                                mUserReference = FirebaseDatabase
+                                .getInstance()
+                                .getReference()
+                                .child(Constants.FIREBASE_CHILD_USERS);
+                                Map<String, Users> users = new HashMap<>();
+                                users.put(name, new Users(name, id));
+                                mUserReference.push().setValue(newUser);
+
+                        }
+                    }
+                });
+    }
+
     private void createAuthStateListener() {
         mAuthListener = new FirebaseAuth.AuthStateListener() {
             @Override
@@ -165,26 +200,9 @@ public class CreateAccountActivity extends AppCompatActivity implements View.OnC
         }
         return true;
     }
-    private void createFirebaseUserProfile(final FirebaseUser user) {
 
-        UserProfileChangeRequest addProfileName = new UserProfileChangeRequest.Builder()
-                .setDisplayName(mName)
-                .build();
-
-        user.updateProfile(addProfileName)
-                .addOnCompleteListener(new OnCompleteListener<Void>() {
-
-                    @Override
-                    public void onComplete(@NonNull Task<Void> task) {
-                        if (task.isSuccessful()) {
-                            Log.d(TAG, user.getDisplayName());
-                        }
-                    }
-
-                });
-    }
-
-    public void saveNameToFirebase(String name) {
-        mUserReference.setValue(name);
-    }
+//
+//    public void saveNameToFirebase(String name) {
+//        mUserReference.setValue(name);
+//    }
 }

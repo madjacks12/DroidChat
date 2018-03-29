@@ -12,16 +12,16 @@ public class Users {
     String email;
 
 
-
     public Users() {}
 
-    public Users(String name, String id, String email){
+    public Users(String name, String id){
         this.name = name;
         this.id = id;
         this.email = email;
     }
 
     public String getName() {
+
         return name;
     }
 

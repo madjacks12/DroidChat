@@ -1,10 +1,12 @@
 package com.example.guest.chatapp.ui;
 
 import android.content.Intent;
+import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -15,18 +17,28 @@ import com.example.guest.chatapp.R;
 import com.example.guest.chatapp.adapters.UserListAdapter;
 import com.example.guest.chatapp.models.Users;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.ChildEventListener;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.Query;
+import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
 
 import butterknife.BindView;
+import butterknife.ButterKnife;
+
+import static java.lang.String.valueOf;
 
 
 public class UserListActivity extends AppCompatActivity {
     private DatabaseReference mUserReference;
     private UserListAdapter mAdapter;
-    public ArrayList<Users>users;
+    public ArrayList<Users> users = new ArrayList<>();
+    private Query query = FirebaseDatabase.getInstance().getReference("users");
+
 
     @BindView(R.id.recyclerView) RecyclerView mRecyclerView;
 
@@ -34,19 +46,56 @@ public class UserListActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_user_list);
+        ButterKnife.bind(this);
 
         mUserReference = FirebaseDatabase
                 .getInstance()
                 .getReference()
                 .child(Constants.FIREBASE_CHILD_USERS);
 
-        mAdapter = new UserListAdapter;
+        mUserReference.addChildEventListener(new ChildEventListener() {
+            @Override
+            public void onChildAdded(DataSnapshot dataSnapshot, String prevChildKey) {
+                Users user = dataSnapshot.getValue(Users.class);
+                users.add(user);
+                Log.d("HOW MANY FUCKIN PEOPLE", valueOf(users.size()));
+                setAdapter();
+            }
+
+
+            @Override
+            public void onChildChanged(DataSnapshot dataSnapshot, String prevChildKey) {}
+
+            @Override
+            public void onChildRemoved(DataSnapshot dataSnapshot) {}
+
+            @Override
+            public void onChildMoved(DataSnapshot dataSnapshot, String prevChildKey) {}
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {}
+
+        });
+
+
+
+    }
+
+    public void setAdapter() {
+        mAdapter = new UserListAdapter(getApplicationContext(), users);
         mRecyclerView.setAdapter(mAdapter);
-        RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(RestaurantsListActivity.this);
+        RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(UserListActivity.this);
         mRecyclerView.setLayoutManager(layoutManager);
         mRecyclerView.setHasFixedSize(true);
 
     }
+
+
+
+
+
+
+
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu){
